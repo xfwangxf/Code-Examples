@@ -1,16 +1,18 @@
-const mysql = require('mysql2/promise');
+const mysql = require("mysql2/promise");
 
 // Connect to our db on the cloud
 const connect = async () => {
   try {
     const connection = await mysql.createConnection({
-      host: 'database-1.chrcwgi8wrbt.us-east-1.rds.amazonaws.com',
-      user: 'cis557',
-      password: 'cis557+mysql',
-      database: 'game_test',
+      host: "database-1.chrcwgi8wrbt.us-east-1.rds.amazonaws.com",
+      user: "cis557",
+      password: "cis557+mysql",
+      database: "game_test",
     });
-      // Connected to db
-    console.log(`Connected to database: ${connection.connection.config.database}`);
+    // Connected to db
+    console.log(
+      `Connected to database: ${connection.connection.config.database}`
+    );
     return connection;
   } catch (err) {
     console.error(err.message);
@@ -20,10 +22,11 @@ const connect = async () => {
 
 // add a player
 const addPlayer = async (db, newPlayer) => {
-  const query = 'INSERT  INTO game_test.players (player , points) VALUES(?, ?)';
+  const query = "INSERT  INTO game_test.players (player , points) VALUES(?, ?)";
   const params = [newPlayer.player, newPlayer.points];
   try {
     const [row] = await db.execute(query, params);
+    //console.log(row);
     console.log(`Created player with id: ${row.insertId}`);
   } catch (err) {
     console.log(`error: ${err.message}`);
@@ -33,7 +36,7 @@ const addPlayer = async (db, newPlayer) => {
 // get all players
 const getPlayers = async (db) => {
   try {
-    const query = 'SELECT * FROM game_test.players';
+    const query = "SELECT * FROM game_test.players";
     const [rows] = await db.execute(query);
     console.log(`Players: ${JSON.stringify(rows)}`);
   } catch (err) {
@@ -44,7 +47,8 @@ const getPlayers = async (db) => {
 // delete player by name
 const deletePlayer = async (db, name) => {
   try {
-    const query = 'DELETE FROM game_test.players WHERE player=?';
+    
+    const query = "DELETE FROM game_test.players WHERE player=?";
     const [row] = await db.execute(query, [name]);
     console.log(`Deleted ${JSON.stringify(row.affectedRows)} player(s)`);
   } catch (err) {
@@ -53,13 +57,30 @@ const deletePlayer = async (db, name) => {
 };
 
 // update a player - lecture activity
+const updatePlayer = async (db, player) => {
+  try {
+    const [[record]] = await db.query("SELECT * FROM game_test.players WHERE player=?", [player.player]);
+    const query = "UPDATE game_test.players SET player=?, points=? WHERE id=?";
+    const [row] = await db.execute(query, [
+      player.player,
+      player.points,
+      record.id,
+    ]);
+    //console.log(`Got ${JSON.stringify(getPlayer)} `);
+    console.log(`Changed ${JSON.stringify(row.affectedRows)} player(s)`);
+  } catch (err) {
+    console.log(`error: ${err.message}`);
+  }
+};
 
 const operations = async () => {
   const db = await connect();
   await getPlayers(db);
-  addPlayer(db, { player: 'testuser', points: 0 });
-  await getPlayers(db);
-  await deletePlayer(db, 'testuser');
+  //addPlayer(db, { player: "testuser", points: 0 });
+  //await getPlayers(db);
+  ///await deletePlayer(db, "testuser");
+  //await getPlayers(db);
+  await updatePlayer(db, {player: "testuser40", points: 1 });
   await getPlayers(db);
 };
 

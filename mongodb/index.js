@@ -49,7 +49,7 @@ const deletePlayer = async (db, name) => {
         const record = await db.collection('players').findOne({player:name});
         console.log(`record: ${JSON.stringify(record)}`);
         // delete record by id
-        const deleted = await db.collection('players').deleteOne( { '_id' : record._id } );
+        const deleted = await db.collection('players').deleteOne( { _id : record._id } );
         console.log(`Deleted: ${JSON.stringify(deleted)}`);
     }
     catch(err){
@@ -58,15 +58,27 @@ const deletePlayer = async (db, name) => {
 }
 
 // update a player - lecture activity
+const updatePlayer = async (db, player) => {
+  try {
+    const record = await db.collection('players').findOne({player:player.player});
+    const updated = await db.collection('players').updateOne({_id: record._id},{$set: {player: player.player, points: player.points}})
+    console.log(`Updated: ${JSON.stringify(updated)}`);
+  }
+  catch(err){
+    console.log(`error: ${err.message}`);
+  }
+}
 
 
 const operations = async () => {
     const db = await connect();
     //await getPlayers(db);
-    //addPlayer(db, {player: 'testuser', points: 0});
-    //await getPlayers(db); 
-    await deletePlayer(db, 'testuser');  
-    //await getPlayers(db);
+    //addPlayer(db, {player: 'testuser1', points: 0});
+    await getPlayers(db); 
+    await updatePlayer(db, {player:'testuser', points:1})
+    await deletePlayer(db, 'testuser1');  
+    await getPlayers(db);
+
 }
 
 operations();
